@@ -1,0 +1,6 @@
+﻿@extends('layouts.admin')@section('title','Iuran')@section('content')
+<div class="mb-6 flex justify-between"><h1 class="text-2xl font-bold">Iuran Anggota</h1>@if(auth()->user()->hasPermission('finance.manage'))<a href="{{ route('admin.dues.create') }}" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white">+ Periode Baru</a>@endif</div>
+<div class="rounded-xl border bg-white overflow-hidden"><table class="min-w-full text-sm"><thead class="bg-slate-50"><tr><th class="px-4 py-2 text-left">Periode</th><th>Jatuh Tempo</th><th class="text-right">Nominal</th><th>Lunas</th><th></th></tr></thead><tbody>
+@forelse($periods as $p)<tr class="border-t"><td class="px-4 py-2 font-medium">{{ $p->judul }}</td><td class="px-4 py-2">{{ $p->jatuh_tempo->format('d/m/Y') }}</td><td class="px-4 py-2 text-right">@rupiah($p->jumlah)</td><td class="px-4 py-2 text-center">{{ $p->lunas_count }}/{{ $p->payments_count }}</td><td class="px-4 py-2 text-right"><a href="{{ route('admin.dues.show',$p) }}" class="text-emerald-600">Kelola</a></td></tr>@empty<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500">Belum ada periode iuran</td></tr>@endforelse
+</tbody></table><div class="p-3">{{ $periods->links() }}</div>></div>
+@endsection

@@ -1,0 +1,8 @@
+﻿@extends('layouts.admin')@section('title',$period->judul)@section('content')
+<div class="mb-4"><a href="{{ route('admin.dues.index') }}" class="text-sm text-emerald-600">&larr; Kembali</a><h1 class="text-2xl font-bold">{{ $period->judul }}</h1><p class="text-sm text-slate-600">Nominal @rupiah($period->jumlah) | Jatuh tempo {{ $period->jatuh_tempo->format('d F Y') }}</p></div>
+<div class="rounded-xl border bg-white overflow-hidden"><table class="min-w-full text-sm"><thead class="bg-slate-50"><tr><th class="px-4 py-2 text-left">Anggota</th><th>RT</th><th>Status</th>@if(auth()->user()->hasPermission('finance.manage'))<th>Aksi</th>@endif</tr></thead><tbody>
+@foreach($payments as $pay)<tr class="border-t"><td class="px-4 py-2">{{ $pay->member->nama_lengkap }}</td><td class="px-4 py-2">{{ $pay->member->rt->label() }}</td>
+<td class="px-4 py-2"><span class="{{ $pay->status->value==='lunas'?'text-emerald-600':'text-amber-600' }}">{{ $pay->status->label() }}</span>@if($pay->dibayar_pada)<span class="text-xs text-slate-500 block">{{ $pay->dibayar_pada->format('d/m/Y') }}</span>@endif</td>
+@if(auth()->user()->hasPermission('finance.manage'))<td class="px-4 py-2">@if($pay->status->value!=='lunas')<form method="POST" action="{{ route('admin.dues.payments.update',[$period,$pay]) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="lunas"><button class="text-sm text-emerald-600">Tandai Lunas</button></form>@else<form method="POST" action="{{ route('admin.dues.payments.update',[$period,$pay]) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="belum_bayar"><button class="text-sm text-slate-500">Batalkan</button></form>@endif</td>@endif</tr>@endforeach
+</tbody></table></div>
+@endsection

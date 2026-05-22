@@ -1,0 +1,4 @@
+﻿<a href="{{ route('member.dashboard') }}" class="text-sm {{ request()->routeIs('member.dashboard') ? 'text-white font-semibold' : 'text-emerald-100 hover:text-white' }}">Beranda</a>
+<a href="{{ route('member.activities.index') }}" class="text-sm {{ request()->routeIs('member.activities.*') ? 'text-white font-semibold' : 'text-emerald-100 hover:text-white' }}">Kegiatan</a>
+<a href="{{ route('member.announcements.index') }}" class="text-sm {{ request()->routeIs('member.announcements.*') ? 'text-white font-semibold' : 'text-emerald-100 hover:text-white' }}">Pengumuman</a>
+<a href="{{ route('member.dues.index') }}" class="text-sm {{ request()->routeIs('member.dues.*') ? 'text-white font-semibold' : 'text-emerald-100 hover:text-white' }}">Iuran</a>
