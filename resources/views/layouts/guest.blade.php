@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#059669">
     <title>@yield('title', 'Masuk') - {{ config('app.name') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('components.assets-head')
 </head>
 <body class="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 font-sans text-slate-800 antialiased">
     <div class="flex min-h-screen flex-col items-center justify-center px-4 py-8" style="padding-top: max(2rem, env(safe-area-inset-top)); padding-bottom: max(2rem, env(safe-area-inset-bottom));">

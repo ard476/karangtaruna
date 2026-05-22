@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#059669">
     <title>@yield('title', 'Dashboard') - {{ config('app.name') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('components.assets-head')
 </head>
 <body class="min-h-screen bg-slate-100 font-sans text-slate-800 antialiased">
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md" style="padding-top: env(safe-area-inset-top, 0);">
@@ -25,5 +25,6 @@
     </header>
     <main class="page-main">@include('components.flash')@yield('content')</main>
     @include('components.admin-bottom-nav')
+    @include('components.assets-footer')
 </body>
 </html>

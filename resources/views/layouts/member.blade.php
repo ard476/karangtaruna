@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#047857">
     <title>@yield('title', 'Beranda') - {{ config('app.name') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('components.assets-head')
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased">
     <header class="sticky top-0 z-40 bg-emerald-700 text-white shadow-md" style="padding-top: env(safe-area-inset-top, 0);">
