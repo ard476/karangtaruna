@@ -12,7 +12,11 @@
 <body class="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 font-sans text-slate-800 antialiased">
     <div class="flex min-h-screen flex-col items-center justify-center px-4 py-8" style="padding-top: max(2rem, env(safe-area-inset-top)); padding-bottom: max(2rem, env(safe-area-inset-bottom));">
         <div class="mb-6 w-full max-w-md text-center sm:mb-8">
-            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600 text-2xl font-bold text-white shadow-lg shadow-emerald-600/30">KT</div>
+            @if(($organization ?? null)?->logoUrl())
+                <img src="{{ $organization->logoUrl() }}" alt="Logo {{ $organization->name }}" class="mx-auto mb-4 h-16 w-16 rounded-2xl border bg-white object-contain p-2 shadow-lg shadow-emerald-600/20">
+            @else
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600 text-2xl font-bold text-white shadow-lg shadow-emerald-600/30">KT</div>
+            @endif
             @if ($organization ?? null)
                 <h1 class="text-lg font-semibold text-slate-900">{{ $organization->name }}</h1>
                 <p class="mt-1 text-sm text-slate-500">{{ $organization->wilayahLabel() }}</p>

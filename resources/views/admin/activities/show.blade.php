@@ -57,6 +57,29 @@
                             &middot; Hadir: <strong class="text-emerald-700">{{ $hadir }}</strong>
                             &middot; Belum: <strong class="text-amber-700">{{ $belum }}</strong>
                         </p>
+                        @if($shift->qr_token)
+                            @php
+                                $qrUrl = route('public.shift-attendance.create', $shift->qr_token);
+                                $qrImageUrl = route('admin.activities.shift.qr-image', [$activity, $shift]);
+                            @endphp
+                            <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                <p class="text-xs font-semibold text-slate-700">QR absen tanpa login</p>
+                                <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                                    <img src="{{ $qrImageUrl }}" alt="QR absen {{ $shift->nama }}" class="h-28 w-28 rounded-lg border bg-white p-1">
+                                    <div class="min-w-0 flex-1">
+                                        <a href="{{ $qrUrl }}" target="_blank" rel="noopener" class="text-xs font-medium text-emerald-700">Buka halaman absen QR</a>
+                                        <input value="{{ $qrUrl }}" readonly onclick="this.select()" class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600">
+                                        <a
+                                            href="{{ route('admin.activities.shift.qr-download', [$activity, $shift]) }}"
+                                            class="mt-2 inline-flex w-full items-center justify-center rounded-lg border border-emerald-600 bg-white px-3 py-2 text-xs font-medium text-emerald-700"
+                                        >
+                                            Download foto QR
+                                        </a>
+                                        <p class="mt-1 text-[11px] text-slate-500">Link ini statis untuk shift ini. Anggota scan QR, pilih nama, ambil foto, lalu kirim absen.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                         @if($petugas === 0)
                             <p class="text-xs text-red-600 mt-1">Belum ada petugas ditugaskan.</p>
                         @endif
@@ -77,12 +100,13 @@
     </div>
 
     @foreach($activity->shifts as $shift)
-        @if($shift->assignments->isNotEmpty())
+        @if($shift->assignments->isNotEmpty() || $shift->attendances->whereNull('member_id')->isNotEmpty())
             @php
                 $attByMember = $shift->attendances->keyBy('member_id');
+                $publicAttendances = $shift->attendances->whereNull('member_id');
             @endphp
             <div class="rounded-xl border bg-white p-6 mb-4">
-                <h3 class="font-semibold text-sm mb-3">Rekap petugas: {{ $shift->nama }}</h3>
+                <h3 class="font-semibold text-sm mb-3">Rekap absensi: {{ $shift->nama }}</h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead>
@@ -117,6 +141,24 @@
                                     </td>
                                     <td class="px-2 text-center text-xs text-slate-600">{{ $att?->distance_meters !== null ? $att->distance_meters.' m' : '—' }}</td>
                                     <td class="px-2 text-xs text-slate-600">{{ $att?->absen_pada?->format('d/m/Y H:i') ?? '—' }}</td>
+                                </tr>
+                            @endforeach
+                            @foreach($publicAttendances as $att)
+                                <tr class="border-b bg-emerald-50/40">
+                                    <td class="py-2 px-2">{{ $att->public_name }}</td>
+                                    <td class="px-2 text-center">QR</td>
+                                    <td class="px-2 text-center">
+                                        <span class="text-emerald-700">{{ $att->status->label() }}</span>
+                                    </td>
+                                    <td class="px-2">
+                                        @if($att->photo_path)
+                                            <a href="{{ $att->photoUrl() }}" target="_blank" rel="noopener">
+                                                <img src="{{ $att->photoUrl() }}" alt="" class="h-10 w-10 rounded object-cover border inline-block">
+                                            </a>
+                                        @else &mdash; @endif
+                                    </td>
+                                    <td class="px-2 text-center text-xs text-slate-600">{{ $att->distance_meters !== null ? $att->distance_meters.' m' : '—' }}</td>
+                                    <td class="px-2 text-xs text-slate-600">{{ $att->absen_pada?->format('d/m/Y H:i') ?? '—' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

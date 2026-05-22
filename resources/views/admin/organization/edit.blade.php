@@ -3,7 +3,22 @@
 @section('content')
 <x-page-header title="Profil Organisasi" subtitle="Data Karang Taruna & wilayah RT" />
 <div class="card p-4 sm:p-6">
-<form method="POST" action="{{ route('admin.organization.update') }}">@csrf @method('PUT')
+<form method="POST" action="{{ route('admin.organization.update') }}" enctype="multipart/form-data">@csrf @method('PUT')
+<div class="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+<label class="text-sm font-medium">Logo Organisasi</label>
+<div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+@if($organization->logoUrl())
+<img src="{{ $organization->logoUrl() }}" alt="Logo {{ $organization->name }}" class="h-20 w-20 rounded-xl border bg-white object-contain p-2">
+@else
+<div class="flex h-20 w-20 items-center justify-center rounded-xl border bg-white text-sm font-bold text-emerald-700">KT</div>
+@endif
+<div class="flex-1">
+<input type="file" name="logo" accept="image/*" class="block w-full text-sm">
+<p class="mt-1 text-xs text-slate-500">Format gambar JPG/PNG/WebP, maksimal 2 MB.</p>
+@error('logo')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+</div>
+</div>
+</div>
 <div class="grid gap-4 sm:grid-cols-2">
 <div><label class="text-sm font-medium">Nama Karang Taruna *</label>
 <input name="name" value="{{ old('name', $organization->name) }}" required class="input-touch"></</div>

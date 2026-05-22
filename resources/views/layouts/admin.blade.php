@@ -12,9 +12,14 @@
 <body class="min-h-screen bg-slate-100 font-sans text-slate-800 antialiased">
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md" style="padding-top: env(safe-area-inset-top, 0);">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3">
-            <div class="min-w-0 flex-1">
-                <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">Panel Pengurus</p>
-                <p class="truncate text-sm font-bold text-slate-900">{{ $organization?->name ?? config('app.name') }}</p>
+            <div class="flex min-w-0 flex-1 items-center gap-3">
+                @if($organization?->logoUrl())
+                    <img src="{{ $organization->logoUrl() }}" alt="Logo {{ $organization->name }}" class="h-10 w-10 shrink-0 rounded-xl border bg-white object-contain p-1">
+                @endif
+                <div class="min-w-0">
+                    <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">Panel Pengurus</p>
+                    <p class="truncate text-sm font-bold text-slate-900">{{ $organization?->name ?? config('app.name') }}</p>
+                </div>
             </div>
             <div class="hidden shrink-0 items-center gap-2 lg:flex">
                 <span class="max-w-[140px] truncate text-xs text-slate-500">{{ auth()->user()->name }}</span>

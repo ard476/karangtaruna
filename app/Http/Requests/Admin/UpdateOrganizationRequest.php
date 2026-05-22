@@ -25,6 +25,7 @@ class UpdateOrganizationRequest extends FormRequest
             'tahun_berdiri' => ['nullable', 'integer', 'min:1900', 'max:'.date('Y')],
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
+            'logo' => ['nullable', 'image', 'max:2048'],
             'rts' => ['required', 'array', 'min:1'],
             'rts.*.id' => ['required', 'exists:rts,id'],
             'rts.*.name' => ['nullable', 'string', 'max:100'],

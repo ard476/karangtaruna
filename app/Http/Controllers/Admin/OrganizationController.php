@@ -8,6 +8,7 @@ use App\Models\Organization;
 use App\Models\Rt;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class OrganizationController extends Controller
@@ -26,7 +27,17 @@ class OrganizationController extends Controller
         $organization = Organization::firstOrFail();
 
         DB::transaction(function () use ($request, $organization) {
-            $organization->update($request->safe()->except('rts'));
+            $data = $request->safe()->except('rts', 'logo');
+
+            if ($request->hasFile('logo')) {
+                if ($organization->logo_path) {
+                    Storage::disk('public')->delete($organization->logo_path);
+                }
+
+                $data['logo_path'] = $request->file('logo')->store('organization', 'public');
+            }
+
+            $organization->update($data);
 
             foreach ($request->validated('rts') as $rtData) {
                 Rt::where('id', $rtData['id'])

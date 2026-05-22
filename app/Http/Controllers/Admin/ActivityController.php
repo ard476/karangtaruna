@@ -6,6 +6,7 @@ use App\Enums\ActivityKind;
 use App\Enums\AttendanceStatus;
 use App\Enums\MemberStatus;
 use App\Http\Controllers\Controller;
+use App\Services\ShiftQrPosterGenerator;
 use App\Http\Requests\Admin\StoreActivityRequest;
 use App\Http\Requests\Admin\UpdateActivityRequest;
 use App\Http\Requests\Admin\UpdateAttendanceRequest;
@@ -17,8 +18,10 @@ use App\Models\ActivityShift;
 use App\Models\ActivityShiftAssignment;
 use App\Models\ActivityShiftAttendance;
 use App\Models\Member;
+use App\Models\Organization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -81,6 +84,7 @@ class ActivityController extends Controller
             'creator',
             'attendances.member.rt',
             'shifts' => fn ($q) => $q->orderBy('urutan')->orderBy('mulai_pada'),
+            'shifts.assignments.member.rt',
             'shifts.attendances.member.rt',
         ]);
 
@@ -123,6 +127,41 @@ class ActivityController extends Controller
 
         return redirect()->route('admin.activities.index')
             ->with('success', 'Kegiatan berhasil dihapus.');
+    }
+
+    public function shiftQrImage(Request $request, Activity $activity, ActivityShift $shift, ShiftQrPosterGenerator $generator): Response
+    {
+        abort_unless($request->user()->hasPermission('activities.view'), 403);
+        abort_unless($shift->activity_id === $activity->id, 404);
+        abort_if(! $shift->qr_token, 404);
+
+        $png = $generator->generateQrPng(route('public.shift-attendance.create', $shift->qr_token));
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
+    public function downloadShiftQrPoster(Request $request, Activity $activity, ActivityShift $shift, ShiftQrPosterGenerator $generator): Response
+    {
+        abort_unless($request->user()->hasPermission('activities.view'), 403);
+        abort_unless($shift->activity_id === $activity->id, 404);
+        abort_if(! $shift->qr_token, 404);
+
+        $organization = Organization::query()->first();
+        $organizationName = $organization?->name ?? config('app.name');
+        $logoPath = $organization?->logo_path
+            ? Storage::disk('public')->path($organization->logo_path)
+            : null;
+        $attendanceUrl = route('public.shift-attendance.create', $shift->qr_token);
+        $png = $generator->generatePoster($activity, $shift, $organizationName, $attendanceUrl, $logoPath);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'attachment; filename="'.$generator->downloadFilename($activity, $shift, $organizationName).'"',
+            'Cache-Control' => 'no-store',
+        ]);
     }
 
     public function attendance(Request $request, Activity $activity): View|RedirectResponse

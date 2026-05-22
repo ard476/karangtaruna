@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class ActivityShift extends Model
 {
@@ -21,6 +22,7 @@ class ActivityShift extends Model
         'longitude',
         'radius_meters',
         'catatan',
+        'qr_token',
     ];
 
     protected function casts(): array
@@ -37,6 +39,22 @@ class ActivityShift extends Model
     public function activity(): BelongsTo
     {
         return $this->belongsTo(Activity::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (ActivityShift $shift): void {
+            $shift->qr_token ??= self::generateQrToken();
+        });
+    }
+
+    public static function generateQrToken(): string
+    {
+        do {
+            $token = Str::random(40);
+        } while (self::query()->where('qr_token', $token)->exists());
+
+        return $token;
     }
 
     public function attendances(): HasMany

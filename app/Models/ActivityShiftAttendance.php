@@ -11,6 +11,7 @@ class ActivityShiftAttendance extends Model
     protected $fillable = [
         'activity_shift_id',
         'member_id',
+        'public_name',
         'status',
         'photo_path',
         'absen_latitude',

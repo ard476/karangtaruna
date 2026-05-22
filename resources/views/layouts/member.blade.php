@@ -14,9 +14,14 @@
     <header class="sticky top-0 z-40 bg-emerald-700 text-white shadow-md" style="padding-top: env(safe-area-inset-top, 0);">
         <div class="mx-auto max-w-4xl px-4 py-3">
             <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                    <p class="text-[10px] text-emerald-200">Portal Anggota</p>
-                    <p class="truncate font-semibold">{{ $organization?->name ?? config('app.name') }}</p>
+                <div class="flex min-w-0 items-center gap-3">
+                    @if($organization?->logoUrl())
+                        <img src="{{ $organization->logoUrl() }}" alt="Logo {{ $organization->name }}" class="h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-1">
+                    @endif
+                    <div class="min-w-0">
+                        <p class="text-[10px] text-emerald-200">Portal Anggota</p>
+                        <p class="truncate font-semibold">{{ $organization?->name ?? config('app.name') }}</p>
+                    </div>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="shrink-0">@csrf<button type="submit" class="rounded-lg px-3 py-2 text-xs font-medium text-emerald-100 active:bg-emerald-800">Keluar</button></form>
             </div>

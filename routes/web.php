@@ -16,11 +16,14 @@ use App\Http\Controllers\Member\ActivityShiftAttendanceController;
 use App\Http\Controllers\Member\AnnouncementController as MemberAnnouncementController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\DueController as MemberDueController;
+use App\Http\Controllers\PublicShiftAttendanceController;
 use App\Http\Controllers\Webhook\WhatsappAttendanceWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('login'));
 Route::post('/webhook/whatsapp/absensi', WhatsappAttendanceWebhookController::class)->name('webhook.whatsapp.absensi');
+Route::get('/absen/shift/{shift:qr_token}', [PublicShiftAttendanceController::class, 'create'])->name('public.shift-attendance.create');
+Route::post('/absen/shift/{shift:qr_token}', [PublicShiftAttendanceController::class, 'store'])->name('public.shift-attendance.store');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -83,6 +86,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         });
         Route::middleware('permission:activities.view')->group(function () {
             Route::get('/kegiatan/{activity}', [ActivityController::class, 'show'])->name('activities.show');
+            Route::get('/kegiatan/{activity}/shift/{shift}/qr-gambar', [ActivityController::class, 'shiftQrImage'])->name('activities.shift.qr-image');
+            Route::get('/kegiatan/{activity}/shift/{shift}/qr-download', [ActivityController::class, 'downloadShiftQrPoster'])->name('activities.shift.qr-download');
         });
 
         Route::middleware('permission:finance.view')->group(function () {
