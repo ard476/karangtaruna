@@ -45,8 +45,8 @@
             <label class="text-sm font-medium text-slate-700">Foto absensi *</label>
             <p class="text-xs text-slate-500 mb-2">Foto wajib diambil langsung dari kamera HP dan wajah harus terlihat jelas.</p>
             <input type="file" name="photo" id="attendance-photo" accept="image/*" capture="user" class="hidden">
-            <div class="overflow-hidden rounded-lg border bg-slate-950">
-                <video id="camera-preview" class="aspect-video w-full object-cover" autoplay muted playsinline></video>
+            <div class="overflow-hidden rounded-xl border bg-slate-950">
+                <video id="camera-preview" class="h-[65vh] max-h-[560px] min-h-[420px] w-full object-cover sm:h-[520px]" autoplay muted playsinline></video>
                 <canvas id="camera-canvas" class="hidden"></canvas>
             </div>
             <button type="button" id="capture-photo" class="mt-3 w-full rounded-lg border border-emerald-600 bg-white px-3 py-2.5 text-sm font-medium text-emerald-700" disabled>
@@ -56,7 +56,7 @@
                 Buka kamera HP
             </button>
             <p id="camera-status" class="mt-2 text-xs text-slate-500">Membuka kamera...</p>
-            <img id="captured-photo-preview" alt="Preview foto absensi" class="mt-3 hidden h-32 w-32 rounded-lg border object-cover">
+            <img id="captured-photo-preview" alt="Preview foto absensi" class="mt-3 hidden h-64 w-full rounded-xl border object-cover sm:h-80">
             @error('photo')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
         </div>
         <div>
