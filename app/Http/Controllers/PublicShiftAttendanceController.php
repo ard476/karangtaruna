@@ -40,26 +40,9 @@ class PublicShiftAttendanceController extends Controller
         $distanceMeters = null;
         $latitude = isset($validated['latitude']) ? (float) $validated['latitude'] : null;
         $longitude = isset($validated['longitude']) ? (float) $validated['longitude'] : null;
-        $allowLocationBypass = app()->environment('local')
-            && (bool) config('app.attendance_allow_http_without_location');
 
-        if ($shift->hasRadius()) {
-            if ($latitude === null || $longitude === null) {
-                if (! $allowLocationBypass) {
-                    return back()
-                        ->withInput()
-                        ->withErrors(['latitude' => 'Lokasi HP wajib diizinkan untuk absensi shift ini.']);
-                }
-            } else {
-                $distanceMeters = $shift->distanceTo($latitude, $longitude);
-                if ($distanceMeters > $shift->radius_meters) {
-                    return back()
-                        ->withInput()
-                        ->withErrors([
-                            'latitude' => "Anda berada {$distanceMeters} meter dari titik absen. Radius yang diizinkan {$shift->radius_meters} meter.",
-                        ]);
-                }
-            }
+        if ($shift->hasRadius() && $latitude !== null && $longitude !== null) {
+            $distanceMeters = $shift->distanceTo($latitude, $longitude);
         }
 
         $disk = Storage::disk('public');

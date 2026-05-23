@@ -85,7 +85,7 @@ class WhatsappAttendanceWebhookController extends Controller
 
         $message = "Sesi absen dibuka untuk {$shift->activity->judul} - {$shift->nama}.\n";
         $message .= $shift->hasRadius()
-            ? "Kirim lokasi/current location WhatsApp dulu, lalu kirim foto."
+            ? "Kirim foto absensi. Jika bisa, kirim lokasi/current location WhatsApp juga agar lokasi tercatat."
             : "Kirim foto absensi. Jika bisa, kirim lokasi juga sebelum foto.";
         $message .= "\nKetik BATAL untuk membatalkan.";
 
@@ -110,9 +110,6 @@ class WhatsappAttendanceWebhookController extends Controller
         $distance = null;
         if ($shift->hasRadius()) {
             $distance = $shift->distanceTo($latitude, $longitude);
-            if ($distance > $shift->radius_meters) {
-                return $this->reply("Lokasi di luar radius. Jarak Anda {$distance} meter, radius shift {$shift->radius_meters} meter.");
-            }
         }
 
         $session->update([
@@ -124,7 +121,7 @@ class WhatsappAttendanceWebhookController extends Controller
 
         return $this->reply($distance === null
             ? 'Lokasi tersimpan. Sekarang kirim foto absensi.'
-            : "Lokasi valid ({$distance} meter dari titik absen). Sekarang kirim foto absensi.");
+            : "Lokasi tersimpan ({$distance} meter dari titik absen). Sekarang kirim foto absensi.");
     }
 
     private function storePhotoAndAttend(Member $member, string $phone, Request $request): JsonResponse
@@ -135,10 +132,6 @@ class WhatsappAttendanceWebhookController extends Controller
         }
 
         $shift = $session->shift;
-        if ($shift->hasRadius() && ($session->latitude === null || $session->longitude === null)) {
-            return $this->reply('Shift ini memakai radius. Kirim lokasi/current location WhatsApp dulu sebelum foto.');
-        }
-
         $photoPath = $this->storeIncomingPhoto($request, $shift);
         if (! $photoPath) {
             return $this->reply('Foto tidak terbaca. Kirim ulang foto absensi.', 422);

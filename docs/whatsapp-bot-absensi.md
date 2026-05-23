@@ -113,8 +113,8 @@ Response sukses:
 
 ```json
 {
-  "reply": "Sesi absen dibuka untuk Hajatan Pak RT - Shift Pagi.\nKirim lokasi/current location WhatsApp dulu, lalu kirim foto.\nKetik BATAL untuk membatalkan.",
-  "message": "Sesi absen dibuka untuk Hajatan Pak RT - Shift Pagi.\nKirim lokasi/current location WhatsApp dulu, lalu kirim foto.\nKetik BATAL untuk membatalkan."
+  "reply": "Sesi absen dibuka untuk Hajatan Pak RT - Shift Pagi.\nKirim foto absensi. Jika bisa, kirim lokasi/current location WhatsApp juga agar lokasi tercatat.\nKetik BATAL untuk membatalkan.",
+  "message": "Sesi absen dibuka untuk Hajatan Pak RT - Shift Pagi.\nKirim foto absensi. Jika bisa, kirim lokasi/current location WhatsApp juga agar lokasi tercatat.\nKetik BATAL untuk membatalkan."
 }
 ```
 
@@ -143,7 +143,7 @@ Kata `CANCEL` juga diterima.
 
 ### 3. Kirim Lokasi
 
-Dipakai untuk shift yang memakai radius. Untuk shift tanpa radius, lokasi tetap boleh dikirim dan akan disimpan di sesi.
+Opsional. Jika anggota mengirim lokasi, sistem akan mencatat koordinat dan jarak dari titik absen. Absensi tetap bisa dikirim meskipun lokasi tidak dikirim, GPS gagal, atau berada di luar radius.
 
 ```json
 {
@@ -154,23 +154,16 @@ Dipakai untuk shift yang memakai radius. Untuk shift tanpa radius, lokasi tetap 
 }
 ```
 
-Response jika valid:
+Response jika lokasi tersimpan:
 
 ```json
 {
-  "reply": "Lokasi valid (42 meter dari titik absen). Sekarang kirim foto absensi.",
-  "message": "Lokasi valid (42 meter dari titik absen). Sekarang kirim foto absensi."
+  "reply": "Lokasi tersimpan (42 meter dari titik absen). Sekarang kirim foto absensi.",
+  "message": "Lokasi tersimpan (42 meter dari titik absen). Sekarang kirim foto absensi."
 }
 ```
 
-Response jika di luar radius:
-
-```json
-{
-  "reply": "Lokasi di luar radius. Jarak Anda 250 meter, radius shift 100 meter.",
-  "message": "Lokasi di luar radius. Jarak Anda 250 meter, radius shift 100 meter."
-}
-```
+Jika lokasi di luar radius, sistem tetap menyimpannya sebagai catatan jarak dan tidak menolak absensi.
 
 ### 4. Kirim Foto via URL Media
 
@@ -265,14 +258,7 @@ Foto dikirim sebelum sesi:
 }
 ```
 
-Shift radius tapi foto dikirim sebelum lokasi:
-
-```json
-{
-  "reply": "Shift ini memakai radius. Kirim lokasi/current location WhatsApp dulu sebelum foto.",
-  "message": "Shift ini memakai radius. Kirim lokasi/current location WhatsApp dulu sebelum foto."
-}
-```
+Untuk shift radius, foto boleh dikirim meskipun lokasi belum ada. Koordinat dan jarak akan kosong jika anggota tidak mengirim lokasi.
 
 ## Session Absensi
 

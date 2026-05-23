@@ -31,14 +31,10 @@
         <input type="hidden" name="latitude" id="attendance-latitude" value="{{ old('latitude') }}">
         <input type="hidden" name="longitude" id="attendance-longitude" value="{{ old('longitude') }}">
         <input type="hidden" name="accuracy" id="attendance-accuracy" value="{{ old('accuracy') }}">
-        <input type="hidden" id="location-bypass" value="0">
         @if($shift->hasRadius())
             <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-                <p class="font-medium">Lokasi wajib aktif</p>
-                <p class="mt-1 text-xs">Anda harus berada maksimal {{ $shift->radius_meters }} meter dari titik absen shift ini.</p>
-                @if(app()->environment('local') && config('app.attendance_allow_http_without_location'))
-                    <p class="mt-1 text-xs">Mode testing HTTP aktif: jika lokasi diblokir browser, absensi tetap bisa dikirim tanpa cek radius.</p>
-                @endif
+                <p class="font-medium">Lokasi dicatat jika tersedia</p>
+                <p class="mt-1 text-xs">Radius acuan {{ $shift->radius_meters }} meter. Absensi tetap bisa dikirim meskipun GPS gagal atau di luar radius.</p>
                 <p id="location-status" class="mt-2 text-xs">Mengambil lokasi HP...</p>
                 @error('latitude')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
             </div>
@@ -78,7 +74,6 @@
     var status = document.getElementById('location-status');
     var submit = document.getElementById('submit-attendance');
     var form = submit ? submit.closest('form') : null;
-    var locationBypass = document.getElementById('location-bypass');
     var photoInput = document.getElementById('attendance-photo');
     var video = document.getElementById('camera-preview');
     var canvas = document.getElementById('camera-canvas');
@@ -86,9 +81,7 @@
     var fallbackCamera = document.getElementById('fallback-camera');
     var cameraStatus = document.getElementById('camera-status');
     var capturedPreview = document.getElementById('captured-photo-preview');
-    var requiresRadius = @json($shift->hasRadius());
-    var allowHttpLocationBypass = @json(app()->environment('local') && config('app.attendance_allow_http_without_location'));
-    var locationReady = !requiresRadius;
+    var locationReady = true;
     var photoReady = false;
 
     function setStatus(message, isError) {
@@ -149,32 +142,16 @@
     }
 
     if (!navigator.geolocation) {
-        if (requiresRadius && allowHttpLocationBypass) {
-            locationReady = true;
-            if (locationBypass) locationBypass.value = '1';
-            setStatus('Lokasi diblokir/tidak didukung. Mode testing HTTP aktif, absensi tetap bisa dikirim tanpa cek radius.', true);
-            refreshSubmitState();
-        } else {
-            setStatus('Browser tidak mendukung lokasi. Gunakan Chrome/Safari terbaru.', true);
-        }
+        setStatus('Browser tidak mendukung lokasi. Absensi tetap bisa dikirim tanpa GPS.', true);
     } else {
         navigator.geolocation.getCurrentPosition(function (position) {
             lat.value = position.coords.latitude.toFixed(7);
             lng.value = position.coords.longitude.toFixed(7);
             acc.value = Math.round(position.coords.accuracy || 0);
-            locationReady = true;
-            if (locationBypass) locationBypass.value = '0';
-            setStatus('Lokasi didapat (akurasi sekitar ' + acc.value + ' meter).', false);
+            setStatus('Lokasi didapat dan akan dicatat (akurasi sekitar ' + acc.value + ' meter).', false);
             refreshSubmitState();
         }, function () {
-            if (requiresRadius && allowHttpLocationBypass) {
-                locationReady = true;
-                if (locationBypass) locationBypass.value = '1';
-                setStatus('Lokasi diblokir karena HTTP. Mode testing HTTP aktif, absensi tetap bisa dikirim tanpa cek radius.', true);
-            } else {
-                setStatus('Gagal mengambil lokasi. Izinkan akses lokasi, lalu refresh halaman.', requiresRadius);
-                locationReady = !requiresRadius;
-            }
+            setStatus('Gagal mengambil lokasi. Absensi tetap bisa dikirim tanpa GPS.', true);
             refreshSubmitState();
         }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
     }
