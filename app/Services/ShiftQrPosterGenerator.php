@@ -59,7 +59,7 @@ class ShiftQrPosterGenerator
         }
 
         $width = 900;
-        $height = 1200;
+        $height = 1400;
         $img = imagecreatetruecolor($width, $height);
 
         $bg = imagecolorallocate($img, 240, 253, 244);
@@ -73,18 +73,18 @@ class ShiftQrPosterGenerator
         imagefilledrectangle($img, 45, 45, $width - 45, $height - 45, $card);
 
         $font = $this->fontPath();
-        $y = 120;
+        $y = 110;
 
         if ($logoPath && is_file($logoPath)) {
-            $this->drawLogo($img, $logoPath, (int) (($width - 120) / 2), 85, 120);
-            $y = 250;
+            $this->drawLogo($img, $logoPath, (int) (($width - 180) / 2), 70, 180);
+            $y = 295;
         }
 
         if ($font) {
             $y = $this->drawCenteredText($img, $font, 22, $emerald, 'ABSENSI QR SHIFT', $width / 2, $y, 760);
-            $y = $this->drawCenteredText($img, $font, 30, $title, $organizationName, $width / 2, $y + 36, 760, 2);
-            $y = $this->drawCenteredText($img, $font, 22, $title, $activity->judul, $width / 2, $y + 24, 760, 3);
-            $y = $this->drawCenteredText($img, $font, 24, $title, 'Shift: '.$shift->nama, $width / 2, $y + 24, 760, 2);
+            $y = $this->drawCenteredText($img, $font, 34, $title, $organizationName, $width / 2, $y + 38, 760, 2);
+            $y = $this->drawCenteredText($img, $font, 24, $title, $activity->judul, $width / 2, $y + 26, 760, 2);
+            $y = $this->drawCenteredText($img, $font, 28, $title, 'Shift: '.$shift->nama, $width / 2, $y + 26, 760, 2);
 
             $schedule = $shift->mulai_pada->format('d/m/Y H:i');
             if ($shift->selesai_pada) {
@@ -92,19 +92,33 @@ class ShiftQrPosterGenerator
             }
 
             $y = $this->drawCenteredText($img, $font, 18, $muted, $schedule, $width / 2, $y + 28, 760, 2);
-            $this->drawCenteredText($img, $font, 20, $title, 'Scan untuk absen tanpa login', $width / 2, 1060, 760);
-            $this->drawCenteredText($img, $font, 14, $muted, $attendanceUrl, $width / 2, 1110, 760, 3);
         } else {
-            imagestring($img, 5, 300, 100, 'ABSENSI QR SHIFT', $emerald);
-            imagestring($img, 5, 180, 170, $this->truncate($organizationName, 38), $title);
-            imagestring($img, 4, 180, 220, $this->truncate($activity->judul, 42), $title);
-            imagestring($img, 4, 180, 260, $this->truncate('Shift: '.$shift->nama, 42), $title);
-            imagestring($img, 3, 180, 300, 'Scan untuk absen tanpa login', $title);
+            imagestring($img, 5, 300, $y, 'ABSENSI QR SHIFT', $emerald);
+            imagestring($img, 5, 180, $y + 70, $this->truncate($organizationName, 38), $title);
+            imagestring($img, 4, 180, $y + 120, $this->truncate($activity->judul, 42), $title);
+            imagestring($img, 4, 180, $y + 160, $this->truncate('Shift: '.$shift->nama, 42), $title);
+            $y += 210;
         }
 
-        imagefilledrectangle($img, 155, 455, 745, 1045, $card);
-        imagerectangle($img, 155, 455, 745, 1045, $border);
-        imagecopyresampled($img, $qr, 190, 490, 0, 0, 520, 520, imagesx($qr), imagesy($qr));
+        $qrTop = max(600, $y + 35);
+        $qrTop = min($qrTop, 660);
+        $qrFrameSize = 620;
+        $qrSize = 540;
+        $qrFrameLeft = (int) (($width - $qrFrameSize) / 2);
+        $qrLeft = (int) (($width - $qrSize) / 2);
+
+        imagefilledrectangle($img, $qrFrameLeft, $qrTop, $qrFrameLeft + $qrFrameSize, $qrTop + $qrFrameSize, $card);
+        imagerectangle($img, $qrFrameLeft, $qrTop, $qrFrameLeft + $qrFrameSize, $qrTop + $qrFrameSize, $border);
+        imagecopyresampled($img, $qr, $qrLeft, $qrTop + 40, 0, 0, $qrSize, $qrSize, imagesx($qr), imagesy($qr));
+
+        $footerTop = $qrTop + $qrFrameSize + 55;
+        if ($font) {
+            $this->drawCenteredText($img, $font, 22, $title, 'Scan untuk absen tanpa login', $width / 2, $footerTop, 760);
+            $this->drawCenteredText($img, $font, 13, $muted, $attendanceUrl, $width / 2, $footerTop + 50, 780, 3);
+        } else {
+            imagestring($img, 4, 270, $footerTop, 'Scan untuk absen tanpa login', $title);
+            imagestring($img, 2, 80, $footerTop + 45, $this->truncate($attendanceUrl, 95), $muted);
+        }
 
         ob_start();
         imagepng($img);
@@ -135,9 +149,19 @@ class ShiftQrPosterGenerator
             return;
         }
 
+        $sourceWidth = imagesx($logo);
+        $sourceHeight = imagesy($logo);
+        $ratio = min($size / $sourceWidth, $size / $sourceHeight);
+        $targetWidth = (int) round($sourceWidth * $ratio);
+        $targetHeight = (int) round($sourceHeight * $ratio);
+        $targetX = $x + (int) (($size - $targetWidth) / 2);
+        $targetY = $y + (int) (($size - $targetHeight) / 2);
+
         $white = imagecolorallocate($canvas, 255, 255, 255);
-        imagefilledrectangle($canvas, $x - 8, $y - 8, $x + $size + 8, $y + $size + 8, $white);
-        imagecopyresampled($canvas, $logo, $x, $y, 0, 0, $size, $size, imagesx($logo), imagesy($logo));
+        $border = imagecolorallocate($canvas, 209, 250, 229);
+        imagefilledrectangle($canvas, $x - 14, $y - 14, $x + $size + 14, $y + $size + 14, $white);
+        imagerectangle($canvas, $x - 14, $y - 14, $x + $size + 14, $y + $size + 14, $border);
+        imagecopyresampled($canvas, $logo, $targetX, $targetY, 0, 0, $targetWidth, $targetHeight, $sourceWidth, $sourceHeight);
         imagedestroy($logo);
     }
 
