@@ -50,8 +50,8 @@
 
             <div>
                 <label class="text-sm font-medium text-slate-700">Foto absensi *</label>
-                <p class="mb-2 text-xs text-slate-500">Foto wajib diambil dari kamera HP.</p>
-                <input type="file" name="photo" id="attendance-photo" accept="image/*" capture="environment" class="hidden">
+                <p class="mb-2 text-xs text-slate-500">Foto wajib diambil dari kamera HP dan wajah harus terlihat jelas.</p>
+                <input type="file" name="photo" id="attendance-photo" accept="image/*" capture="user" class="hidden">
                 <div class="overflow-hidden rounded-lg border bg-slate-950">
                     <video id="camera-preview" class="aspect-video w-full object-cover" autoplay muted playsinline></video>
                     <canvas id="camera-canvas" class="hidden"></canvas>
@@ -174,7 +174,7 @@
     }
 
     navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        video: { facingMode: { ideal: 'user' } },
         audio: false
     }).then(function (stream) {
         video.srcObject = stream;
@@ -219,3 +219,4 @@
 })();
 </script>
 @endsection
+
