@@ -49,9 +49,14 @@
                 <video id="camera-preview" class="h-[65vh] max-h-[560px] min-h-[420px] w-full object-cover sm:h-[520px]" autoplay muted playsinline></video>
                 <canvas id="camera-canvas" class="hidden"></canvas>
             </div>
-            <button type="button" id="capture-photo" class="mt-3 w-full rounded-lg border border-emerald-600 bg-white px-3 py-2.5 text-sm font-medium text-emerald-700" disabled>
-                Ambil foto dari kamera
-            </button>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+                <button type="button" id="mirror-camera" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700" disabled>
+                    Mirror: Mati
+                </button>
+                <button type="button" id="capture-photo" class="rounded-lg border border-emerald-600 bg-white px-3 py-2.5 text-sm font-medium text-emerald-700" disabled>
+                    Ambil foto
+                </button>
+            </div>
             <button type="button" id="fallback-camera" class="mt-3 hidden w-full rounded-lg border border-emerald-600 bg-white px-3 py-2.5 text-sm font-medium text-emerald-700">
                 Buka kamera HP
             </button>
@@ -78,11 +83,13 @@
     var video = document.getElementById('camera-preview');
     var canvas = document.getElementById('camera-canvas');
     var capture = document.getElementById('capture-photo');
+    var mirror = document.getElementById('mirror-camera');
     var fallbackCamera = document.getElementById('fallback-camera');
     var cameraStatus = document.getElementById('camera-status');
     var capturedPreview = document.getElementById('captured-photo-preview');
     var locationReady = true;
     var photoReady = false;
+    var isMirrored = false;
 
     function setStatus(message, isError) {
         if (!status) return;
@@ -102,11 +109,24 @@
         if (submit) submit.disabled = !(photoReady && locationReady);
     }
 
+    function applyMirrorState() {
+        if (video) video.style.transform = isMirrored ? 'scaleX(-1)' : '';
+        if (mirror) mirror.textContent = isMirrored ? 'Mirror: Aktif' : 'Mirror: Mati';
+    }
+
     function showFallbackCamera(message) {
         if (capture) capture.classList.add('hidden');
+        if (mirror) mirror.classList.add('hidden');
         if (video) video.classList.add('hidden');
         if (fallbackCamera) fallbackCamera.classList.remove('hidden');
         setCameraStatus(message, true);
+    }
+
+    if (mirror) {
+        mirror.addEventListener('click', function () {
+            isMirrored = !isMirrored;
+            applyMirrorState();
+        });
     }
 
     if (fallbackCamera) {
@@ -168,6 +188,8 @@
     }).then(function (stream) {
         video.srcObject = stream;
         if (capture) capture.disabled = false;
+        if (mirror) mirror.disabled = false;
+        applyMirrorState();
         setCameraStatus('Kamera aktif. Tekan tombol "Ambil foto dari kamera".', false);
     }).catch(function () {
         showFallbackCamera('Kamera langsung tidak bisa dibuka. Tekan "Buka kamera HP" untuk mengambil foto.');
@@ -182,7 +204,19 @@
 
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            var context = canvas.getContext('2d');
+
+            if (isMirrored) {
+                context.save();
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+            }
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            if (isMirrored) {
+                context.restore();
+            }
 
             canvas.toBlob(function (blob) {
                 if (!blob) {
